@@ -2,7 +2,7 @@ import { connectedJoyCons } from "joy-con-webhid-ts";
 import { multiplyMatrices, rotMatrixRoll, rotMatrixPitch, rotMatrixYaw } from "./util";
 import { BomjEulerAngles, invertEulerAngles, rotateEulerAngles } from "./angle";
 
-const correction 
+const correction = 1.2
 
 export interface InputState {
   virtualPosition: {
@@ -68,22 +68,14 @@ export function setupInputSystem(): void {
 
         if (detail.gyroscopes) {
           inputOrientation = {
-            yaw: detail.gyroscopes[0][0].dps * ,
-            pitch: detail.gyroscopes[0][1].dps,
-            roll: detail.gyroscopes[0][2].dps,
+            yaw: detail.gyroscopes[0][0].dps * correction,
+            pitch: detail.gyroscopes[0][1].dps * correction,
+            roll: detail.gyroscopes[0][2].dps * correction,
           }
         }
 
 
-        if (detail.buttonStatus?.sl) {
-          iState.initialOrientation.yaw = 0
-          iState.initialOrientation.pitch = 0
-          iState.initialOrientation.roll = 0
-
-          iState.virtualPositionOffset.x = iState.virtualPosition.x
-          iState.virtualPositionOffset.y = iState.virtualPosition.y
-          iState.virtualPositionOffset.z = iState.virtualPosition.z
-        }
+        
 
         // const preparedEulerAngles = rotateEulerAngles(inputOrientation, invertEulerAngles(iState.initialOrientation))
         const preparedEulerAngles = {
@@ -100,6 +92,13 @@ export function setupInputSystem(): void {
         iState.virtualPosition.x = iState.trackedOrientation.pitch - iState.virtualPositionOffset.x
         iState.virtualPosition.y = iState.trackedOrientation.roll - iState.virtualPositionOffset.y
         // iState.virtualPosition.z = iState.virtualPosition.z - iState.virtualPositionOffset.z
+
+        if (detail.buttonStatus?.sl) {
+          iState.trackedOrientation.yaw = 0
+          iState.trackedOrientation.pitch = 0
+          iState.trackedOrientation.roll = 0
+
+        }
 
       });
       console.log('Event listener set')
