@@ -7,6 +7,4 @@ interface Window {
 interface HTMLDivElement {
   posX: number | undefined,
   posY: number | undefined
-
-  posY: number | undefined
 }
