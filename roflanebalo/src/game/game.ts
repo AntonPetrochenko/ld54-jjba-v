@@ -1,10 +1,36 @@
-import { inputState } from "./engine/input";
+import { InputState, inputState } from "./engine/input";
 
 let backgrounds: NodeListOf<HTMLDivElement> | null
 let backgroundsWidth: number
 let backgroundsWidthWithMargin: number
 
+let spam = false
+let ar: HTMLDivElement | null
+
+interface GameObject {
+  update: (dt: number) => void
+  despawn: () => void
+  spawn: () => void
+
+  markedForDeletion: boolean
+}
+
+const worldObjects: Array<GameObject> = []
+
+function spawnWorldObject(object: GameObject) {
+  worldObjects.push(object)
+  object.spawn()
+}
+
 export function init() {
+  ar = document.querySelector<HTMLDivElement>('.perspective-object')
+  document.addEventListener('keydown', () => {
+    window.spam = true
+  })
+  document.addEventListener('keyup', () => {
+    window.spam = false
+  })
+
   backgrounds = document.querySelectorAll<HTMLDivElement>('.background-second')
   if (backgrounds) {
     backgrounds.forEach((value: HTMLDivElement, key: number) => {
@@ -25,6 +51,24 @@ export function update(dt: number) {
   if (!frameSkpped) {
     frameSkpped = !frameSkpped
     return
+  }
+
+  if (ar) {
+    const j = inputState.find((e) => e !== undefined)
+    if (j) {
+      ar.style.transform = `
+        translate3d(
+          ${Math.floor(j.virtualPosition.x)}px,
+          ${Math.floor(j.virtualPosition.y)}px,
+          ${Math.floor(j.virtualPosition.z)}px
+        )
+      `;
+      ar.innerText = `
+          ${j.trackedOrientation.yaw}
+          ${j.trackedOrientation.pitch}
+          ${j.trackedOrientation.roll}
+      `
+    }
   }
   
   if (backgrounds) {
@@ -51,4 +95,13 @@ export function update(dt: number) {
       }
     })
   }
+
+  worldObjects.forEach( (worldObject, idx) => {
+    worldObject.update(dt)
+
+    if (worldObject.markedForDeletion) {
+      worldObject.despawn()
+      worldObjects.splice(idx, 1)
+    }
+  })
 }

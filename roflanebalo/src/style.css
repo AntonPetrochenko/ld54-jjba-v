@@ -1,9 +1,10 @@
-.arrow {
-  width: 0;
-  height: 0;
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
-  border-bottom: 20px solid black;
+.perspective-container {
+  perspective: 400px;
+  position: absolute;
+  transform: translate(50vw, 50vh);
+}
+
+.perspective-object {
 }
 
 body {

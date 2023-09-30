@@ -18,10 +18,14 @@ async function forgetAllHIDDevices() {
   }
 }
 
+let started = false
+
 document.addEventListener('click', async () => {
-  await forgetAllHIDDevices()
   await JoyCon.connectJoyCon()
-  start()
-}, {once: true})
+  if (!started) {
+    await forgetAllHIDDevices()
+    start()
+  }
+})
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = ``

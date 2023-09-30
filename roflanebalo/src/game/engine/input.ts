@@ -1,16 +1,22 @@
 import { connectedJoyCons } from "joy-con-webhid-ts";
+import { multiplyMatrices, rotMatrixRoll, rotMatrixPitch, rotMatrixYaw } from "./util";
+import { BomjEulerAngles, invertEulerAngles, rotateEulerAngles } from "./angle";
 
-interface InputState {
+const correction = 1.2
+
+export interface InputState {
   virtualPosition: {
     x: number,
     y: number,
     z: number,
   }
-  trackedOrientation: {
-    a: number,
-    b: number,
-    c: number
+  virtualPositionOffset: {
+    x: number,
+    y: number,
+    z: number,
   }
+  trackedOrientation: BomjEulerAngles
+  initialOrientation: BomjEulerAngles
 }
 
 const inputState: InputState[] = []
@@ -23,12 +29,20 @@ export function setupInputSystem(): void {
     window.cons = connectedJoyCons.values()
 
     connectedJoyCons.forEach( async (joyCon, key) => {
+      console.log(key)
       if (!key) {
         return
       }
       // @ts-ignore lmao
       if (joyCon.eventListenerAttached) {
         return;
+      }
+
+      inputState[key] = {
+        trackedOrientation: {yaw:0,pitch:0,roll:0},
+        virtualPosition: {x:0,y:0,z:0},
+        virtualPositionOffset: {x:0,y:0,z:0},
+        initialOrientation: {yaw:0,pitch:0,roll:0},
       }
       // Open the device and enable standard full mode and inertial measurement
       // unit mode, so the Joy-Con activates the gyroscope and accelerometers.
@@ -39,22 +53,57 @@ export function setupInputSystem(): void {
       await joyCon.enableVibration();
       // Get information about the connected Joy-Con.
       // @ts-ignore lmao?
-      await joyCon.rumble(600, 600, 0.5);
+      await joyCon.rumble(600, 600, 0.3);
       // Listen for HID input reports.
       console.log('Setting event listener')
       console.log(joyCon.opened)
       joyCon.addEventListener('hidinput', ({ detail }) => {
+        let iState = inputState[key]
 
-        if (detail.actualOrientation) {
-          inputState[key].trackedOrientation.a = parseFloat(detail.actualOrientation.alpha)
-          inputState[key].trackedOrientation.b = parseFloat(detail.actualOrientation.beta)
-          inputState[key].trackedOrientation.c = parseFloat(detail.actualOrientation.gamma)
+        let inputOrientation: BomjEulerAngles = {
+          yaw: 0,
+          pitch: 0,
+          roll: 0
+        };
+
+        if (detail.gyroscopes) {
+          inputOrientation = {
+            yaw: detail.gyroscopes[0][0].dps * correction,
+            pitch: detail.gyroscopes[0][1].dps * correction,
+            roll: detail.gyroscopes[0][2].dps * correction,
+          }
         }
-        console.log('*')
+
+
+        
+
+        // const preparedEulerAngles = rotateEulerAngles(inputOrientation, invertEulerAngles(iState.initialOrientation))
+        const preparedEulerAngles = {
+          yaw: inputOrientation.yaw / 100,
+          pitch: inputOrientation.pitch / 100,
+          roll: inputOrientation.roll / 100
+        }
+
+        iState.trackedOrientation.yaw += preparedEulerAngles.yaw
+        iState.trackedOrientation.pitch += preparedEulerAngles.pitch
+        iState.trackedOrientation.roll += preparedEulerAngles.roll
+
+        
+        iState.virtualPosition.x = iState.trackedOrientation.pitch - iState.virtualPositionOffset.x
+        iState.virtualPosition.y = iState.trackedOrientation.roll - iState.virtualPositionOffset.y
+        // iState.virtualPosition.z = iState.virtualPosition.z - iState.virtualPositionOffset.z
+
+        if (detail.buttonStatus?.sl) {
+          iState.trackedOrientation.yaw = 0
+          iState.trackedOrientation.pitch = 0
+          iState.trackedOrientation.roll = 0
+
+        }
+
       });
       console.log('Event listener set')
       // @ts-ignore lol
       joyCon.eventListenerAttached = true;
     })
-  }, 100);
+  }, 1000);
 }
