@@ -1,0 +1,17 @@
+{
+  "name": "roflanebalo",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "joy-con-webhid-ts": "^0.1.1"
+  }
+}
