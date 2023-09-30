@@ -6,3 +6,41 @@
 
 .perspective-object {
 }
+
+body {
+  margin: 0;
+  padding: 0;
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.background {
+  display: flex;
+  width: 200%;
+  height: 30%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background: rgb(170, 204, 170);
+  z-index: -1;
+}
+
+.background-second,
+.background-second,
+.background-second {
+  position: absolute;
+  left: 0;
+  width: 30%;
+  height: 100%;
+  background: red;
+}
+[data-background="1"] {
+  background: blue;
+  left: 30%;
+}
+[data-background="2"] {
+  background: purple;
+  left: 60%;
+  width: 31%;
+}
