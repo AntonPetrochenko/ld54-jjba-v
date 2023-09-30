@@ -4,7 +4,8 @@ function a(dt: number) {}
 
 let stateFunc = a
 
-export function setupGameplayLoop(handler: ((dt: number) => void)) {
+export function setupGameplayLoop(init: () => void, handler: ((dt: number) => void)) {
+  init()
   stateFunc = handler
   requestAnimationFrame(frame)
 }

@@ -1,17 +1,19 @@
 import { connectedJoyCons } from "joy-con-webhid-ts";
 
-const inputState = {
+interface InputState {
   virtualPosition: {
-    x: 0,
-    y: 0,
-    z: 0
-  },
+    x: number,
+    y: number,
+    z: number,
+  }
   trackedOrientation: {
-    a: 0,
-    b: 0,
-    c: 0
+    a: number,
+    b: number,
+    c: number
   }
 }
+
+const inputState: InputState[] = []
 
 export { inputState }
 
@@ -19,10 +21,14 @@ export function setupInputSystem(): void {
   setInterval(async () => {
     // @ts-ignore
     window.cons = connectedJoyCons.values()
-    for (const joyCon of connectedJoyCons.values()) {
+
+    connectedJoyCons.forEach( async (joyCon, key) => {
+      if (!key) {
+        return
+      }
       // @ts-ignore lmao
       if (joyCon.eventListenerAttached) {
-        continue;
+        return;
       }
       // Open the device and enable standard full mode and inertial measurement
       // unit mode, so the Joy-Con activates the gyroscope and accelerometers.
@@ -40,15 +46,15 @@ export function setupInputSystem(): void {
       joyCon.addEventListener('hidinput', ({ detail }) => {
 
         if (detail.actualOrientation) {
-          inputState.trackedOrientation.a = parseFloat(detail.actualOrientation.alpha)
-          inputState.trackedOrientation.b = parseFloat(detail.actualOrientation.beta)
-          inputState.trackedOrientation.c = parseFloat(detail.actualOrientation.gamma)
+          inputState[key].trackedOrientation.a = parseFloat(detail.actualOrientation.alpha)
+          inputState[key].trackedOrientation.b = parseFloat(detail.actualOrientation.beta)
+          inputState[key].trackedOrientation.c = parseFloat(detail.actualOrientation.gamma)
         }
         console.log('*')
       });
       console.log('Event listener set')
       // @ts-ignore lol
       joyCon.eventListenerAttached = true;
-    }
+    })
   }, 100);
 }

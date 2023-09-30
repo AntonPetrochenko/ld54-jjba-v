@@ -24,5 +24,4 @@ document.addEventListener('click', async () => {
   start()
 }, {once: true})
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-`
+document.querySelector<HTMLDivElement>('#app')!.innerHTML = ``

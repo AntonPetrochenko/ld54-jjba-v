@@ -1,9 +1,14 @@
 import { inputState } from "./engine/input";
 
-const ar = document.querySelector<HTMLDivElement>('.arrow')
+let ar: HTMLDivElement | null
+
+export function init() {
+  ar = document.querySelector<HTMLDivElement>('.arrow')
+}
+
 export function update() {
   if (ar) {
-    console.log(inputState.trackedOrientation)
-    ar.style.transform = `rotate3D(${inputState.trackedOrientation.a}deg, ${inputState.trackedOrientation.b}deg, ${inputState.trackedOrientation.c}deg)`
+    console.log(inputState[0].trackedOrientation)
+    ar.style.transform = `rotate3D(${inputState[0].trackedOrientation.a}deg, ${inputState[0].trackedOrientation.b}deg, ${inputState[0].trackedOrientation.c}deg)`
   }
 }
