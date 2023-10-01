@@ -10,13 +10,18 @@ export class CharacterSelector implements GameObject {
   hitboxElement?: HTMLElement | undefined;
   markedForDeletion = false
 
+  textElement: HTMLElement | undefined;
   posX: number
   posY: number
 
-  constructor(c: Character, x: number, y: number) {
+  textCaption: string = ''
+
+  constructor(c: Character, x: number, y: number, text: string) {
     this.characterData = c
     this.posX = x
     this.posY = y
+
+    this.textCaption = text
   }
   
   public spawn() {
@@ -24,15 +29,32 @@ export class CharacterSelector implements GameObject {
     icon.classList.add('mobile')
     icon.src = this.characterData.image
 
+    let text = document.createElement('div') 
+
+    text.classList.add('hudtext')
+    text.classList.add('mobile')
+
+
+
     icon.style.left = `${this.posX}px`
     icon.style.top = `${this.posY}px`
+    text.style.left = `${this.posX}px`
+    text.style.top = `${this.posY}px`
     document.body.appendChild(icon)
+    document.body.appendChild(text)
+    text.innerText = this.textCaption
+    text.style.fontSize = '40px';
     this.hitboxElement = icon
+
+    this.textElement = text
   }
 
   public despawn() {
     if (this.hitboxElement) {
       this.hitboxElement.remove()
+    }
+    if (this.textElement) {
+      this.textElement.remove()
     }
   }
 
@@ -42,9 +64,12 @@ export class CharacterSelector implements GameObject {
 
   public hit(iState?: PlayerState) {
     if (iState) {
-      iState.playerName = this.characterData.name
-      iState.shootSound = new Howl({src: [this.characterData.firesound]})
-      this.markedForDeletion = true
+      if (!iState.playerSet) {
+        iState.playerSet = true
+        iState.playerName = this.characterData.name
+        iState.shootSound = new Howl({src: [this.characterData.firesound]})
+        this.markedForDeletion = true
+      }
     }
   }
 }

@@ -26,6 +26,7 @@ export interface PlayerState {
   initialOrientation: BomjEulerAngles
   isFireDownOld: boolean
   isLeftJoyCon: boolean
+  playerSet: boolean
   playerName: string
   shootSound: undefined | Howl
   dtUpdate: (dt: number) => void
@@ -76,7 +77,9 @@ export function setupInputSystem(): void {
         crosshairElement: crosshair,
         isFireDownOld: false,
         isLeftJoyCon: isLeftJoyCon,
-        playerName: 'а кто',
+        playerName: 'А КТО',
+        playerSet: false,
+        shootSound: undefined,
         dtUpdate() {
           
         },

@@ -29,7 +29,7 @@ function spawnWorldObject(object: GameObject) {
   object.spawn()
 }
 
-let spawnTimer = 0;
+let spawnTimer = -10;
 
 
 export function init() {
@@ -57,8 +57,8 @@ export function init() {
     })
   } 
 
-  spawnWorldObject(new CharacterSelector(characters[0], 100, 100))
-  spawnWorldObject(new CharacterSelector(characters[1], 500, 100))
+  spawnWorldObject(new CharacterSelector(characters[0], 100, 100, 'КТО ТЫ, ВОИН?<br>СКОРО ВСЁ НАЧНЁТСЯ'))
+  spawnWorldObject(new CharacterSelector(characters[1], 500, 100, 'ВЫБЕРИ ПЕРСОНАЖА<br>СКОРО ВСЁ НАЧНЁТСЯ'))
 }
 
 let frameSkpped = false
@@ -97,6 +97,11 @@ function spawnLine(builder: (x: number, y: number) => GameObject, count: number,
   }
 }
 
+let gameStarted = false
+const mus = new Howl({src: ['/music.mp3'], volume: 0.2, loop: true});
+
+let gameEnded = false
+
 export function update(dt: number) {
   if (ar) {
     ar.innerText = worldObjects.length.toString()
@@ -109,6 +114,19 @@ export function update(dt: number) {
   spawnTimer += dt
 
   if (spawnTimer >= 0) {
+
+    if (!gameStarted) {
+      
+      worldObjects.forEach( (o) => {
+        if (o instanceof CharacterSelector) {
+          o.markedForDeletion = true
+        }
+      })
+
+      mus.play()
+      gameStarted = true
+    }
+
     if (spawnTimer > 0.4 && worldObjects.length < 3) {
       testSpawnPosition++
       // spawnWorldObject(new Enemy('/target.png', 100, 150))
@@ -120,7 +138,7 @@ export function update(dt: number) {
       const x2 = window.innerWidth/2 + Math.random()*window.innerWidth/2;
       const y2 = window.innerHeight/2 + Math.random()*window.innerHeight/2;
   
-      const spawnCount = Math.random()*5
+      const spawnCount = Math.ceil(Math.random()*4)
       spawnLine((x,y) => {
         return new Enemy(src, x,y);
       }, spawnCount, x1, y1, x2, y2);
@@ -136,6 +154,31 @@ export function update(dt: number) {
       }, spawnCount, mirrorX1, mirrorY1, mirrorX2, mirrorY2);
   
       spawnTimer = 0
+    }
+
+    let hasAlivePlayers = false
+    inputState.forEach( (p) => {
+      if (p.health > 0) {
+        hasAlivePlayers = true
+        
+      }
+    })
+
+    if (!hasAlivePlayers && !gameEnded) {
+      const gameOverText = document.createElement('div')
+      gameOverText.textContent = 'ГЕЙМ ОВЕР'
+      gameOverText.classList.add('hudtext')
+      gameOverText.classList.add('mobile')
+      
+      gameOverText.style.top = '50vh'
+      gameOverText.style.left= '50vw'
+      gameOverText.style.color='red'
+
+      document.body.appendChild(gameOverText)
+      mus.stop()
+        setInterval( () => {
+          window.location.reload()
+        }, 4000)
     }
   }
   

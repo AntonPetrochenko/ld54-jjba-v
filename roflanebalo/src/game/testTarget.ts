@@ -25,7 +25,7 @@ export const randomImageSrcs = [
 ]
 
 const randomSounds = randomSoundPaths.map( path => new Howl({src: path}) )
-
+let phraseCountdown = 10
 export class Enemy implements GameObject {
   public posX = window.innerWidth + 100
   public posY = window.innerHeight - Math.random()*700-100 
@@ -61,7 +61,7 @@ export class Enemy implements GameObject {
       this.src = src
     }
 
-    if (Math.random() < 0.1 ) {
+    if (Math.random() < 0.3 ) {
       this.src = getRandomElement(randomImageSrcs)
     }
 
@@ -153,7 +153,8 @@ export class Enemy implements GameObject {
       iState.score += 30+Math.floor(Math.random()*100)
       refreshHud()
     }
-    if (Math.random() < 0.1) {
+    if (--phraseCountdown < 0) {
+      phraseCountdown = 15
       getRandomElement(randomSounds).play()
     }
   }
