@@ -1,4 +1,5 @@
 import { InputState, inputState } from "./engine/input";
+import Chel from "./chel";
 
 let backgrounds: NodeListOf<HTMLDivElement> | null
 let backgroundsWidth: number
@@ -7,7 +8,7 @@ let backgroundsWidthWithMargin: number
 let spam = false
 let ar: HTMLDivElement | null
 
-interface GameObject {
+export interface GameObject {
   update: (dt: number) => void
   despawn: () => void
   spawn: () => void
