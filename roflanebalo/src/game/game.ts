@@ -1,5 +1,8 @@
+import { CharacterSelector } from "./characterSelector";
+import { characters } from "./characters";
 import { PlayerState, inputState } from "./engine/input";
-import { Enemy } from "./testTarget";
+import { getRandomElement, lerp } from "./engine/util";
+import { Enemy, randomImageSrcs } from "./testTarget";
 
 let backgrounds: NodeListOf<HTMLDivElement> | null | undefined
 let backgroundsWidth: number
@@ -14,7 +17,7 @@ export interface GameObject {
   spawn: () => void
 
   hitboxElement?: HTMLElement
-  hit?: () => void
+  hit?: (iState?: PlayerState) => void
 
   markedForDeletion: boolean
 }
@@ -53,6 +56,9 @@ export function init() {
       }
     })
   } 
+
+  spawnWorldObject(new CharacterSelector(characters[0], 100, 100))
+  spawnWorldObject(new CharacterSelector(characters[1], 500, 100))
 }
 
 let frameSkpped = false
@@ -69,7 +75,7 @@ export function dealDamage(crosshairElement: HTMLElement, iState?: PlayerState) 
               rect1.x + rect1.width > rect2.x &&
               rect1.y < rect2.y + rect2.height &&
               rect1.y + rect1.height > rect2.y  ) {
-          obj.hit()
+          obj.hit(iState)
           if (iState) {
 
           }
@@ -80,6 +86,16 @@ export function dealDamage(crosshairElement: HTMLElement, iState?: PlayerState) 
 }
 
 let testSpawnPosition = 0
+
+
+function spawnLine(builder: (x: number, y: number) => GameObject, count: number, x1: number, y1: number, x2: number, y2: number) {
+  for (let i = 0; i<count; i++) {
+    const x = lerp(x1,x2,i/count)
+    const y = lerp(y1,y2,i/count)
+    const o = builder(x,y)
+    spawnWorldObject(o)
+  }
+}
 
 export function update(dt: number) {
   if (ar) {
@@ -92,10 +108,35 @@ export function update(dt: number) {
 
   spawnTimer += dt
 
-  if (spawnTimer > 0.4 && worldObjects.length < 3) {
-    testSpawnPosition++
-    spawnWorldObject(new Enemy('/target.png', Math.random()*window.innerWidth, Math.random()*window.innerHeight))
-    spawnTimer = 0
+  if (spawnTimer >= 0) {
+    if (spawnTimer > 0.4 && worldObjects.length < 3) {
+      testSpawnPosition++
+      // spawnWorldObject(new Enemy('/target.png', 100, 150))
+
+      const src = getRandomElement(randomImageSrcs)
+
+      const x1 = Math.random()*window.innerWidth/2;
+      const y1 = Math.random()*window.innerHeight/2;
+      const x2 = window.innerWidth/2 + Math.random()*window.innerWidth/2;
+      const y2 = window.innerHeight/2 + Math.random()*window.innerHeight/2;
+  
+      const spawnCount = Math.random()*5
+      spawnLine((x,y) => {
+        return new Enemy(src, x,y);
+      }, spawnCount, x1, y1, x2, y2);
+  
+      // Creating the coordinates for the mirrored line
+      const mirrorX1 = window.innerWidth - x1;  // Mirrored X coordinate for x1
+      const mirrorY1 = y1;                       // Mirrored Y coordinate for y1
+      const mirrorX2 = window.innerWidth - x2;  // Mirrored X coordinate for x2
+      const mirrorY2 = y2;                       // Mirrored Y coordinate for y2
+  
+      spawnLine((x,y) => {
+        return new Enemy(src, x,y);
+      }, spawnCount, mirrorX1, mirrorY1, mirrorX2, mirrorY2);
+  
+      spawnTimer = 0
+    }
   }
   
   if (backgrounds) {

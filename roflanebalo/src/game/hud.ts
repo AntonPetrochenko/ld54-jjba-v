@@ -10,12 +10,17 @@ export function createHud() {
 export function refreshHud() {
   scoreContainer.innerHTML = '';
 
+
   inputState.forEach( (player) => {
     const playerScore = document.createElement('div')
-    playerScore.innerHTML = `SCORE: ${player.score}`
     playerScore.classList.add('hudtext')
-    playerScore.style.color = player.isLeftJoyCon ? 'red' : 'blue'
-
+    playerScore.style.color = player.isLeftJoyCon ? 'blue' : 'red'
+    
+    if (player.health > 0) {
+      playerScore.innerHTML = ` ${player.playerName.toUpperCase()} SCORE: ${player.score.toString().padStart(5, '0')} LIVES: ${player.health}`
+    } else {
+      playerScore.innerHTML = ` VMER SCORE: ${player.score.toString().padStart(5, '0')}`
+    }
     scoreContainer.appendChild(playerScore)
   })
 }

@@ -2,6 +2,8 @@ import { JoyConLeft, connectedJoyCons } from "joy-con-webhid-ts";
 import { BomjEulerAngles, clampDegrees, rotateVector } from "./angle";
 import { dealDamage } from "../game";
 import { refreshHud } from "../hud";
+import { getRandomElement, getVectorLength } from "./util";
+import {Howl} from 'howler';
 
 const correction = 1.2
 
@@ -24,10 +26,14 @@ export interface PlayerState {
   initialOrientation: BomjEulerAngles
   isFireDownOld: boolean
   isLeftJoyCon: boolean
+  playerName: string
+  shootSound: undefined | Howl
   dtUpdate: (dt: number) => void
 }
 
 const inputState: PlayerState[] = []
+
+let maxObservedPower = 0;
 
 export { inputState }
 
@@ -70,6 +76,7 @@ export function setupInputSystem(): void {
         crosshairElement: crosshair,
         isFireDownOld: false,
         isLeftJoyCon: isLeftJoyCon,
+        playerName: 'а кто',
         dtUpdate() {
           
         },
@@ -87,8 +94,8 @@ export function setupInputSystem(): void {
       // @ts-ignore lmao?
       await joyCon.rumble(600, 600, 0.3);
       // Listen for HID input reports.
-      console.log('Setting event listener')
-      console.log(joyCon.opened)
+      // console.log('Setting event listener')
+      // console.log(joyCon.opened)
       joyCon.addEventListener('hidinput', ({ detail }) => {
         let iState = inputState[key]
 
@@ -136,9 +143,10 @@ export function setupInputSystem(): void {
           isFireDown = !!(detail.buttonStatus.l || detail.buttonStatus.r || detail.buttonStatus.zl || detail.buttonStatus.zr)
 
           if (isFireDown && (isFireDown != iState.isFireDownOld) && iState.crosshairElement) {
-            dealDamage(iState.crosshairElement)
+            dealDamage(iState.crosshairElement, iState)
             iState.virtualPosition.z = 100
             refreshHud()
+            iState.shootSound?.play()
             // joyCon.rumble(200,600,0.5)
             // setInterval( () => joyCon.rumble(0,0,0), 0.5)
           }
@@ -152,13 +160,41 @@ export function setupInputSystem(): void {
           iState.crosshairElement.style.transform= `scale(${100 + iState.virtualPosition.z}%)`
         }
 
+        if (detail.actualAccelerometer) {
+          const a = detail.actualAccelerometer
+          // console.log(a)
+          const l = getVectorLength(a.x, a.y, a.z);
+          if (l > maxObservedPower) {
+            maxObservedPower = l
+            console.log('stronk', l)
+          }
+          if (l > 0.1) {
+            console.log('huiyak')
+          }
+        }
+        if (iState.crosshairElement) {
+          if (iState.health > 0) {
+            iState.crosshairElement.style.display = 'block';
+          } else {
+            iState.crosshairElement.style.display = 'none';
+          }
+
+        }
+
         iState.virtualPosition.z *= 0.95
         
 
       });
-      console.log('Event listener set')
+      // console.log('Event listener set')
       // @ts-ignore lol
       joyCon.eventListenerAttached = true;
     })
   }, 1000);
+}
+
+export function hurtRandomPlayer() {
+  const p = getRandomElement(inputState) 
+  p.health -= 1
+
+  refreshHud()
 }

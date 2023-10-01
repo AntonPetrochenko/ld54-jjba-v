@@ -12,7 +12,7 @@ async function forgetAllHIDDevices() {
       await device.close();
     }
 
-    console.log('All HID devices forgotten.');
+    // console.log('All HID devices forgotten.');
   } catch (error) {
     console.error('Error forgetting HID devices:', error);
   }

@@ -12,6 +12,8 @@
     "vite": "^4.4.5"
   },
   "dependencies": {
+    "@types/howler": "^2.2.9",
+    "howler": "^2.2.4",
     "joy-con-webhid-ts": "^0.1.1"
   }
 }
