@@ -1,43 +1,28 @@
 export interface BomjEulerAngles {
-  yaw: number;
-  pitch: number;
-  roll: number;
+  yaw: number,
+  pitch: number,
+  roll: number
 }
 
-export function rotateEulerAngles(original: BomjEulerAngles, rotation: BomjEulerAngles): BomjEulerAngles {
-  // Convert degrees to radians
-  const yawRad = (rotation.yaw * Math.PI) / 180;
-  const pitchRad = (rotation.pitch * Math.PI) / 180;
-  const rollRad = (rotation.roll * Math.PI) / 180;
+export function rotateVector(vector: [number, number], angleDegrees: number): [number, number] {
+  // Convert the angle from degrees to radians
+  const angleRadians = (angleDegrees * Math.PI) / 180;
 
-  // Perform rotation using Euler angles
-  const cosYaw = Math.cos(yawRad);
-  const sinYaw = Math.sin(yawRad);
-  const cosPitch = Math.cos(pitchRad);
-  const sinPitch = Math.sin(pitchRad);
-  const cosRoll = Math.cos(rollRad);
-  const sinRoll = Math.sin(rollRad);
+  // Extract the x and y components of the vector
+  const [x, y] = vector;
 
-  const rotated: BomjEulerAngles = {
-    yaw: original.yaw,
-    pitch: original.pitch,
-    roll: original.roll
-  };
+  // Calculate the rotated x and y components using the rotation matrix
+  const rotatedX = x * Math.cos(angleRadians) - y * Math.sin(angleRadians);
+  const rotatedY = x * Math.sin(angleRadians) + y * Math.cos(angleRadians);
 
-  // Rotate yaw
-  rotated.yaw += cosYaw * cosPitch * cosRoll - sinYaw * sinRoll;
-  // Rotate pitch
-  rotated.pitch += sinYaw * cosPitch * cosRoll + cosYaw * sinRoll;
-  // Rotate roll
-  rotated.roll += sinPitch * cosRoll;
-
-  return rotated;
+  // Return the rotated vector
+  return [rotatedX, rotatedY];
 }
 
-export function invertEulerAngles(angles: BomjEulerAngles): BomjEulerAngles {
-  return {
-    yaw: -angles.yaw,
-    pitch: -angles.pitch,
-    roll: -angles.roll
-  };
+export function clampDegrees(angleDegrees: number): number {
+  // Calculate the equivalent angle within the range of -360 to 360
+  const clampedAngle = angleDegrees % 360;
+
+  // Adjust the angle if it falls outside the range of 0 to 360
+  return clampedAngle < 0 ? clampedAngle + 360 : clampedAngle;
 }

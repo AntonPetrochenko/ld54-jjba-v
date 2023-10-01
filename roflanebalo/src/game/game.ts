@@ -1,7 +1,7 @@
-import { InputState, inputState } from "./engine/input";
-import Chel from "./chel";
+import { PlayerState, inputState } from "./engine/input";
+import { Enemy } from "./testTarget";
 
-let backgrounds: NodeListOf<HTMLDivElement> | null
+let backgrounds: NodeListOf<HTMLDivElement> | null | undefined
 let backgroundsWidth: number
 let backgroundsWidthWithMargin: number
 
@@ -13,6 +13,9 @@ export interface GameObject {
   despawn: () => void
   spawn: () => void
 
+  hitboxElement?: HTMLElement
+  hit?: () => void
+
   markedForDeletion: boolean
 }
 
@@ -23,8 +26,14 @@ function spawnWorldObject(object: GameObject) {
   object.spawn()
 }
 
+let spawnTimer = 0;
+
+
 export function init() {
   ar = document.querySelector<HTMLDivElement>('.perspective-object')
+
+
+
   document.addEventListener('keydown', () => {
     window.spam = true
   })
@@ -48,28 +57,45 @@ export function init() {
 
 let frameSkpped = false
 
+export function dealDamage(crosshairElement: HTMLElement, iState?: PlayerState) {
+  worldObjects.forEach( (obj) => {
+    if (obj.hitboxElement && obj.hit) {
+
+      if (crosshairElement) {
+        const rect1 = crosshairElement.getBoundingClientRect()
+        const rect2 = obj.hitboxElement.getBoundingClientRect()
+  
+        if (  rect1.x < rect2.x + rect2.width &&
+              rect1.x + rect1.width > rect2.x &&
+              rect1.y < rect2.y + rect2.height &&
+              rect1.y + rect1.height > rect2.y  ) {
+          obj.hit()
+          if (iState) {
+
+          }
+        }
+      }
+    }
+  })
+}
+
+let testSpawnPosition = 0
+
 export function update(dt: number) {
+  if (ar) {
+    ar.innerText = worldObjects.length.toString()
+  }
   if (!frameSkpped) {
     frameSkpped = !frameSkpped
     return
   }
 
-  if (ar) {
-    const j = inputState.find((e) => e !== undefined)
-    if (j) {
-      ar.style.transform = `
-        translate3d(
-          ${Math.floor(j.virtualPosition.x)}px,
-          ${Math.floor(j.virtualPosition.y)}px,
-          ${Math.floor(j.virtualPosition.z)}px
-        )
-      `;
-      ar.innerText = `
-          ${j.trackedOrientation.yaw}
-          ${j.trackedOrientation.pitch}
-          ${j.trackedOrientation.roll}
-      `
-    }
+  spawnTimer += dt
+
+  if (spawnTimer > 0.4 && worldObjects.length < 3) {
+    testSpawnPosition++
+    spawnWorldObject(new Enemy('/target.png', Math.random()*window.innerWidth, Math.random()*window.innerHeight))
+    spawnTimer = 0
   }
   
   if (backgrounds) {
