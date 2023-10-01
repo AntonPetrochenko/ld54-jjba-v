@@ -1,10 +1,13 @@
-class Сhel {
+import { GameObject } from "./game";
+
+class Chel implements GameObject {
   posX: number
   posY: number
   stopTimer: number
   shootTimer: number
   isStopped: boolean
   image: string | null
+  markedForDeletion: boolean
 
   htmlRepresentation: HTMLImageElement | undefined
 
@@ -15,6 +18,7 @@ class Сhel {
     this.shootTimer = shootTimer
     this.isStopped = isStopped
     this.image = image
+    this.markedForDeletion = false
   }
 
   spawn () {
@@ -41,4 +45,10 @@ class Сhel {
   despawn () {
 
   }
+
+  update(dt: number) {
+
+  }
 }
+
+export default Chel
