@@ -194,7 +194,7 @@ export function setupInputSystem(): void {
 
 export function hurtRandomPlayer() {
   const p = getRandomElement(inputState) 
-  p.health -= 1
+  // p.health -= 1
 
   refreshHud()
 }

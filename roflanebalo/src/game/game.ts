@@ -4,9 +4,14 @@ import { PlayerState, inputState } from "./engine/input";
 import { getRandomElement, lerp } from "./engine/util";
 import { Enemy, randomImageSrcs } from "./testTarget";
 
-let backgrounds: NodeListOf<HTMLDivElement> | null | undefined
-let backgroundsWidth: number
-let backgroundsWidthWithMargin: number
+interface ParallaxEntity {
+  elements?: NodeListOf<HTMLDivElement>
+  width?: number
+  widthWithMargin?: number
+}
+
+let backgrounds: ParallaxEntity = {}
+let roads: ParallaxEntity = {}
 
 let spam = false
 let ar: HTMLDivElement | null
@@ -44,21 +49,25 @@ export function init() {
     window.spam = false
   })
 
-  backgrounds = document.querySelectorAll<HTMLDivElement>('.background-second')
-  if (backgrounds) {
-    backgrounds.forEach((value: HTMLDivElement, key: number) => {
-      if (backgrounds) {
-        backgrounds[key].posX = value.getBoundingClientRect().x
-      }
-      if (key == 0) {
-        backgroundsWidth = value.getBoundingClientRect().width;
-        backgroundsWidthWithMargin = backgroundsWidth + 30;
-      }
-    })
-  } 
+  roads.elements = document.querySelectorAll<HTMLDivElement>('.background-second')
+  backgrounds.elements = document.querySelectorAll<HTMLDivElement>('.body-background')
+  parallaxInit(roads)
+  parallaxInit(backgrounds)
 
   spawnWorldObject(new CharacterSelector(characters[0], 100, 100))
   spawnWorldObject(new CharacterSelector(characters[1], 500, 100))
+}
+
+function parallaxInit(px: ParallaxEntity) {
+  if (px.elements) {
+    px.elements.forEach((value: HTMLDivElement, key: number) => {
+        value.posX = value.getBoundingClientRect().x
+      if (key == 0) {
+        px.width = value.getBoundingClientRect().width;
+        px.widthWithMargin = px.width + 30;
+      }
+    })
+  } 
 }
 
 let frameSkpped = false
@@ -138,31 +147,9 @@ export function update(dt: number) {
       spawnTimer = 0
     }
   }
-  
-  if (backgrounds) {
-    backgrounds.forEach((value: HTMLDivElement, key: number) => {
-      if (value.posX != undefined) {
-        value.posX -= 300*dt
-        value.style.left = `${value.posX}px`
 
-        if (value.posX < -backgroundsWidthWithMargin) {
-          let newPos: number = 0
-          if (backgrounds) {          
-            backgrounds.forEach((secondValue: HTMLDivElement) => {
-              if (secondValue.posX != undefined) {
-                if (secondValue.posX > newPos) {
-                  newPos = secondValue.posX
-                }
-              }
-            })
-
-            backgrounds[key].posX = newPos + backgroundsWidth
-            value.style.left = `${backgrounds[key].posX}px`
-          }
-        }
-      }
-    })
-  }
+  parallaxUpdate(roads, 300, dt)
+  parallaxUpdate(backgrounds, 200, dt)
 
   worldObjects.forEach( (worldObject, idx) => {
     worldObject.update(dt)
@@ -172,4 +159,31 @@ export function update(dt: number) {
       worldObjects.splice(idx, 1)
     }
   })
+}
+
+function parallaxUpdate(px: ParallaxEntity, speed: number, dt: number) {
+  if (px.elements) {
+    px.elements.forEach((value: HTMLDivElement, key: number) => {
+      if (value.posX != undefined && px.width && px.widthWithMargin != undefined) {
+        value.posX -= speed*dt
+        value.style.left = `${value.posX}px`
+
+        if (value.posX < -px.widthWithMargin) {
+          let newPos: number = 0
+          if (px.elements) {          
+            px.elements.forEach((secondValue: HTMLDivElement) => {
+              if (secondValue.posX != undefined) {
+                if (secondValue.posX > newPos) {
+                  newPos = secondValue.posX
+                }
+              }
+            })
+
+            value.posX = newPos + px.width
+            value.style.left = `${value.posX}px`
+          }
+        }
+      }
+    })
+  }
 }
