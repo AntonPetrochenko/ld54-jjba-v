@@ -94,7 +94,7 @@ export function update(dt: number) {
 
   if (spawnTimer > 0.4 && worldObjects.length < 3) {
     testSpawnPosition++
-    spawnWorldObject(new Enemy('/target.png'))
+    spawnWorldObject(new Enemy('/target.png', Math.random()*window.innerWidth, Math.random()*window.innerHeight))
     spawnTimer = 0
   }
   
