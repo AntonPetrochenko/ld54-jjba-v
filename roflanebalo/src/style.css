@@ -3,6 +3,31 @@ body {
   position: absolute;
 }
 
+.body-backgrounds {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: -10;
+}
+
+.body-background {
+  position: absolute;
+  left: 0;
+  width: 31%;
+  height: 100%;
+  background: url(/jungle.png) 100% 100% / 100% 100% no-repeat;
+}
+[data-body-background="1"] {
+  left: 30%;
+}
+[data-body-background="2"] {
+  left: 60%;
+  width: 32%;
+}
+
 .perspective-object {
 }
 
@@ -21,27 +46,22 @@ body {
   position: absolute;
   bottom: 0;
   left: 0;
-  background: rgb(170, 204, 170);
   z-index: -1;
 }
 
-.background-second,
-.background-second,
 .background-second {
   position: absolute;
   left: 0;
-  width: 30%;
+  width: 31%;
   height: 100%;
-  background: red;
+  background: url(/doroga.png) 100% 100% / 100% 100% no-repeat;
 }
 [data-background="1"] {
-  background: blue;
   left: 30%;
 }
 [data-background="2"] {
-  background: purple;
   left: 60%;
-  width: 31%;
+  width: 32%;
 }
 
 
