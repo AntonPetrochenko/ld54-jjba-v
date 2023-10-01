@@ -1,6 +1,7 @@
 import { setupInputSystem } from "./engine/input"
 import { setupGameplayLoop } from "./engine/loop"
 import { init, update } from "./game"
+import { createHud } from "./hud";
 
 export function start() {
   document.body.innerHTML = `<div class="perspective-container">
@@ -12,5 +13,6 @@ export function start() {
 
   setupInputSystem()
   setupGameplayLoop(init, update)
+  createHud()
 }
 
